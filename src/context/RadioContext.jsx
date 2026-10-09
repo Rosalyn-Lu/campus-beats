@@ -7,6 +7,7 @@ const RadioContext = createContext(null);
 export function RadioProvider({ children }) {
   const [songs, setSongs] = useState(() => MOCK_SONGS.map((s) => ({ ...s })));
   const [votedIds, setVotedIds] = useState([]);
+  const [isDarkMode, setIsDarkMode] = useState(true); // 默认开启深夜粒子模式
   const votedRef = useRef(new Set());
 
   const vote = useCallback((id) => {
@@ -21,15 +22,20 @@ export function RadioProvider({ children }) {
     setSongs((prev) => [song, ...prev]);
   }, []);
 
+  const updateCover = useCallback((id, newCover) => {
+    setSongs((prev) => prev.map((s) => (s.id === id ? { ...s, cover: newCover } : s)));
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setIsDarkMode((prev) => !prev);
+  }, []);
+
   const value = useMemo(
     () => ({
-      songs,
-      votedIds,
-      hasVoted: (id) => votedIds.includes(id),
-      vote,
-      addSong,
+      songs, votedIds, hasVoted: (id) => votedIds.includes(id),
+      vote, addSong, updateCover, isDarkMode, toggleTheme,
     }),
-    [songs, votedIds, vote, addSong]
+    [songs, votedIds, vote, addSong, updateCover, isDarkMode, toggleTheme]
   );
 
   return <RadioContext.Provider value={value}>{children}</RadioContext.Provider>;
